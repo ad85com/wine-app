@@ -53,6 +53,8 @@ async function boot() {
   $('currencyInput').value = currency;
   renderAll();
 
+  if (typeof SYNC !== 'undefined') SYNC.init();
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
@@ -416,7 +418,9 @@ async function saveForm(e) {
     if (photoURLs[id]) URL.revokeObjectURL(photoURLs[id]);
     photoURLs[id] = URL.createObjectURL(pendingPhoto);
     pendingPhoto = null;
+    if (typeof SYNC !== 'undefined') SYNC.markPhoto(id);
   }
+  if (typeof SYNC !== 'undefined') SYNC.markWine(id);
 
   closeSheet('form');
   renderAll();
@@ -485,6 +489,7 @@ async function saveDrink(e) {
   await db.put('drinks', entry);
   await db.put('wines', w);
   drinks.push(entry);
+  if (typeof SYNC !== 'undefined') { SYNC.markDrink(entry.id); SYNC.markWine(w.id); }
 
   closeSheet('drink');
   renderAll();
@@ -492,6 +497,10 @@ async function saveDrink(e) {
 }
 
 async function deleteWine(id) {
+  if (typeof SYNC !== 'undefined') {
+    SYNC.markDeleted('wines', id);
+    for (const d of drinks.filter(d => d.wineId === id)) SYNC.markDeleted('drinks', d.id);
+  }
   await db.del('wines', id);
   await db.del('photos', id);
   for (const d of drinks.filter(d => d.wineId === id)) await db.del('drinks', d.id);

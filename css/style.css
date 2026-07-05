@@ -562,6 +562,36 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 
 .settings-note { color: var(--text-dim); font-size: 12.5px; margin-top: 14px; line-height: 1.5; }
 
+/* ---------- sync & scan ---------- */
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-h {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.sync-btn { margin-top: 2px; }
+.sync-status { font-size: 14px; color: var(--text); }
+
+.identify-btn {
+  width: 100%;
+  margin-top: 8px;
+  border-color: rgba(212, 169, 92, 0.35);
+  color: var(--gold);
+}
+
 /* ---------- toast ---------- */
 .toast {
   position: fixed;

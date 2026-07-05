@@ -1,11 +1,15 @@
 /* Service worker — offline-first app shell */
-const CACHE = 'cellar-v3';
+const CACHE = 'cellar-v4';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
+  './js/vendor/supabase.js',
+  './js/config.js',
   './js/db.js',
   './js/pairings.js',
+  './js/sync.js',
+  './js/scan.js',
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon-180.png',

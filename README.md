@@ -28,6 +28,15 @@ All data is stored privately on your device and works fully offline.
   the wine, to grab current market prices and ratings.
 - **Backup** — export/import the whole collection (including photos and
   history) as a single JSON file.
+- **Cross-device sync** — sign in with an email one-time code (Supabase) and
+  your wines, history and label photos sync automatically between iPhone,
+  iPad and any other device. Data is protected by row-level security; only
+  your account can read it.
+- **AI label identification** — snap the label, tap "✨ Identify wine from
+  photo" and Claude reads the label and pre-fills name, producer, vintage,
+  region, grapes, drinking window and a tasting note — you review and save.
+  Requires your own Anthropic API key (⚙︎ settings, stored on-device only;
+  a scan costs a few cents).
 
 ## Install on your iPhone
 
@@ -50,6 +59,14 @@ open those sites pre-searched, and you paste the values in (30 seconds per
 wine). For bulk enrichment, export your collection JSON and ask Claude to fill
 in regions, grapes, drinking windows, ratings and market prices, then import
 the enriched file back.
+
+## Setting up sync
+
+The Supabase project URL and publishable key live in `js/config.js`. One-time
+setup in the Supabase dashboard: run the SQL in the project docs (tables
+`wines`, `drinks` + `labels` storage bucket with RLS), and add `{{ .Token }}`
+to **Authentication → Email Templates → Magic Link** so login emails include
+the 6-digit code the app asks for.
 
 ## Data & privacy
 
