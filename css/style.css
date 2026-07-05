@@ -614,8 +614,12 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 }
 .note-chevron { color: var(--gold); transition: transform 0.2s; flex-shrink: 0; }
 .note-toggle.open .note-chevron { transform: rotate(180deg); }
+.note-titles { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.note-when { font-size: 12px; font-weight: 400; color: var(--text-dim); }
 .note-full { margin-top: 8px; white-space: pre-wrap; }
-.note-date { margin-top: 10px; font-size: 12px; color: var(--text-dim); font-style: normal; }
+
+.lookup-bottom { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.lookup-bottom .pairing-list { justify-content: center; }
 
 .pairing-list { display: flex; flex-wrap: wrap; gap: 7px; }
 .pairing-item {

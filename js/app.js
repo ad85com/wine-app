@@ -127,14 +127,22 @@ function cellarWines() {
   return wines.filter(w => w.status === 'cellar' && w.quantity > 0);
 }
 
-/* Drinking-window status for the current year */
+/* Drinking-window status for the current year — label always shows the window */
 function windowStatus(w) {
   const year = new Date().getFullYear();
   if (!w.drinkFrom && !w.drinkTo) return null;
-  if (w.drinkFrom && year < w.drinkFrom) return { cls: 'hold', label: `⏳ Hold until ${w.drinkFrom}` };
-  if (w.drinkTo && year > w.drinkTo) return { cls: 'past', label: '⚠️ Past peak' };
-  if (w.drinkTo && year >= w.drinkTo - 1) return { cls: 'soon', label: `🔥 Drink by ${w.drinkTo}` };
-  return { cls: 'ready', label: w.drinkTo ? `✓ Ready (until ${w.drinkTo})` : '✓ Ready' };
+  const range = `${w.drinkFrom || '…'}–${w.drinkTo || '…'}`;
+  if (w.drinkFrom && year < w.drinkFrom) return { cls: 'hold', label: `⏳ Hold · ${range}` };
+  if (w.drinkTo && year > w.drinkTo) return { cls: 'past', label: `⚠️ Past peak (${range})` };
+  if (w.drinkTo && year >= w.drinkTo - 1) return { cls: 'soon', label: `🔥 Drink now · until ${w.drinkTo}` };
+  return { cls: 'ready', label: `✓ Drink ${range}` };
+}
+
+/* "May 2026" from an ISO date string */
+function monthYear(d) {
+  if (!d) return null;
+  const dt = new Date(d);
+  return isNaN(dt) ? null : dt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 }
 
 function toast(msg) {
@@ -304,8 +312,8 @@ function openDetail(id) {
     w.abv && cell('ABV', w.abv + '%'),
     w.size && cell('Bottle size', SIZE_LABELS[w.size] || w.size),
     (w.drinkFrom || w.drinkTo) && cell('Drinking window', `${w.drinkFrom || '…'} – ${w.drinkTo || '…'}`),
-    w.ratingVivino && cell('Vivino', '★ ' + w.ratingVivino + ' / 5'),
-    w.ratingCritic && cell('Critic score', w.ratingCritic + ' / 100'),
+    w.ratingVivino && cell('Vivino users', '★ ' + w.ratingVivino + ' / 5'),
+    w.ratingCritic && cell('Wine-Searcher critics', w.ratingCritic + ' / 100'),
     mkt != null && cell('Market price', money(mkt) + (w.marketCurrency === 'EUR' ? ` (€${w.marketPrice})` : ''), 'gold'),
     gross != null && cell('Purchase incl. 8.1% VAT', money(gross)),
     w.purchasePrice != null && cell('Purchase excl. VAT (as paid)', money(w.purchasePrice)),
@@ -330,10 +338,13 @@ function openDetail(id) {
 
     ${(w.edulisTitle || w.edulisBody || w.edulisNotes) ? `<div class="detail-section"><h3>Edulis notes</h3>
       <button type="button" class="note-toggle" id="edulisToggle">
-        <span class="note-title">${esc(w.edulisTitle || 'Note from Edulis')}</span>
+        <span class="note-titles">
+          <span class="note-title">${esc(w.edulisTitle || 'Note from Edulis')}</span>
+          ${monthYear(w.purchaseDate || w.edulisDate) ? `<span class="note-when">Purchased ${monthYear(w.purchaseDate || w.edulisDate)}</span>` : ''}
+        </span>
         <span class="note-chevron">▾</span>
       </button>
-      <div class="note-block note-full hidden" id="edulisFull">${esc(w.edulisBody || w.edulisNotes || '')}${w.edulisDate ? `<div class="note-date">📧 Edulis email · ${w.edulisDate}</div>` : ''}</div>
+      <div class="note-block note-full hidden" id="edulisFull">${esc(w.edulisBody || w.edulisNotes || '')}</div>
     </div>` : ''}
     ${w.notes ? `<div class="detail-section"><h3>My notes</h3><div class="note-block">${esc(w.notes)}</div></div>` : ''}
 
@@ -343,18 +354,18 @@ function openDetail(id) {
     ${wineDrinks.length ? `<div class="detail-section"><h3>Tasting history</h3>
       ${wineDrinks.map(d => `<div class="note-block" style="margin-bottom:8px">🗓 ${d.date || '—'}${d.rating ? ` · ★ ${d.rating}` : ''}${d.note ? `<br>“${esc(d.note)}”` : ''}</div>`).join('')}</div>` : ''}
 
-    <div class="detail-section"><h3>Look up online</h3>
-      <div class="pairing-list">
-        <a class="pairing-item" href="https://www.wine-searcher.com/find/${q}" target="_blank" rel="noopener">🔎 Wine-Searcher</a>
-        <a class="pairing-item" href="https://www.vivino.com/search/wines?q=${q}" target="_blank" rel="noopener">🍇 Vivino</a>
-      </div>
-    </div>
-
     <div class="detail-actions">
       ${inCellar ? `<button class="btn primary" id="drinkBtn">🥂 Drink a bottle</button>` : ''}
       <div class="detail-actions-row">
         <button class="btn ghost" id="editBtn">✏️ Edit</button>
         <button class="btn danger" id="deleteBtn">Delete</button>
+      </div>
+    </div>
+
+    <div class="detail-section lookup-bottom">
+      <div class="pairing-list">
+        <a class="pairing-item" href="https://www.wine-searcher.com/find/${q}" target="_blank" rel="noopener">🔎 Wine-Searcher</a>
+        <a class="pairing-item" href="https://www.vivino.com/search/wines?q=${q}" target="_blank" rel="noopener">🍇 Vivino</a>
       </div>
     </div>
   `;
