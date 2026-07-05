@@ -179,7 +179,7 @@ function renderList() {
     list = list.filter(w =>
       [w.name, w.producer, w.region, w.country, w.appellation, (w.grapes || []).join(' '),
        String(w.vintage || ''), STYLE_LABELS[w.style], SIZE_SHORT[w.size], SIZE_LABELS[w.size],
-       w.edulisNotes, w.notes]
+       w.edulisTitle, w.edulisBody, w.edulisNotes, w.notes]
         .join(' ').toLowerCase().includes(q));
   }
 
@@ -328,7 +328,13 @@ function openDetail(id) {
 
     <div class="detail-section"><h3>Details</h3><div class="info-grid">${infoCells}</div></div>
 
-    ${w.edulisNotes ? `<div class="detail-section"><h3>Edulis notes</h3><div class="note-block">${esc(w.edulisNotes)}</div></div>` : ''}
+    ${(w.edulisTitle || w.edulisBody || w.edulisNotes) ? `<div class="detail-section"><h3>Edulis notes</h3>
+      <button type="button" class="note-toggle" id="edulisToggle">
+        <span class="note-title">${esc(w.edulisTitle || 'Note from Edulis')}</span>
+        <span class="note-chevron">▾</span>
+      </button>
+      <div class="note-block note-full hidden" id="edulisFull">${esc(w.edulisBody || w.edulisNotes || '')}${w.edulisDate ? `<div class="note-date">📧 Edulis email · ${w.edulisDate}</div>` : ''}</div>
+    </div>` : ''}
     ${w.notes ? `<div class="detail-section"><h3>My notes</h3><div class="note-block">${esc(w.notes)}</div></div>` : ''}
 
     ${pairings.length ? `<div class="detail-section"><h3>Pairs well with</h3>
@@ -354,6 +360,12 @@ function openDetail(id) {
   `;
 
   openSheet('detail');
+
+  const edulisToggle = $('edulisToggle');
+  if (edulisToggle) edulisToggle.addEventListener('click', () => {
+    $('edulisFull').classList.toggle('hidden');
+    edulisToggle.classList.toggle('open');
+  });
 
   const drinkBtn = $('drinkBtn');
   if (drinkBtn) drinkBtn.addEventListener('click', () => { closeSheet('detail'); openDrink(w.id); });
@@ -397,7 +409,9 @@ function openForm(id) {
   updateVatHint();
   $('f-purchaseDate').value = w?.purchaseDate || '';
   $('f-location').value = w?.location || 'boxed';
-  $('f-edulisNotes').value = w?.edulisNotes || '';
+  $('f-edulisTitle').value = w?.edulisTitle || '';
+  $('f-edulisBody').value = w?.edulisBody || w?.edulisNotes || '';
+  $('f-edulisDate').value = w?.edulisDate || '';
   $('f-notes').value = w?.notes || '';
   $('f-photo').value = '';
 
@@ -450,7 +464,9 @@ async function saveForm(e) {
     vatRate: VAT_RATE,
     purchaseDate: $('f-purchaseDate').value || null,
     location: $('f-location').value,
-    edulisNotes: $('f-edulisNotes').value.trim(),
+    edulisTitle: $('f-edulisTitle').value.trim(),
+    edulisBody: $('f-edulisBody').value.trim(),
+    edulisDate: $('f-edulisDate').value || null,
     notes: $('f-notes').value.trim(),
   };
 
