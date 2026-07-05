@@ -61,14 +61,15 @@ async function identifyLabel() {
             { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
             {
               type: 'text',
-              text: 'Identify this wine from its label. Respond with ONLY a JSON object (no markdown, no commentary) with exactly these keys, using null for anything you cannot determine: '
+              text: 'Identify this wine from its label — the photo may show a single bottle, a wine label, or a case/box of wine. Respond with ONLY a JSON object (no markdown, no commentary) with exactly these keys, using null for anything you cannot determine: '
                 + '"name" (string, the wine name as on the label), "producer" (string), "vintage" (integer year), '
                 + '"style" (one of: "red","white","rose","sparkling","sweet","fortified"), '
                 + '"country" (string), "region" (string), "appellation" (string), '
                 + '"grapes" (array of grape variety strings — use the typical blend for this wine if not on the label), '
                 + '"abv" (number, from the label if visible), '
                 + '"drinkFrom" (integer year) and "drinkTo" (integer year) for the typical drinking window of this wine and vintage, '
-                + '"description" (one sentence about this wine\'s character). '
+                + '"description" (one sentence about this wine\'s character), '
+                + '"bottleCount" (integer — if the photo shows a case or box, how many bottles it holds, e.g. a case stamped "6 bouteilles" or "12x75cl" → 6 or 12; also count multiple identical visible bottles; null for a single bottle). '
                 + 'Be accurate rather than complete — prefer null over guessing.',
             },
           ],
@@ -93,7 +94,12 @@ async function identifyLabel() {
     const w = JSON.parse(match[0]);
 
     fillFormFromScan(w);
-    toast('✨ Identified! Check the details, then save');
+    if (w.bottleCount > 1) {
+      document.getElementById('f-quantity').value = w.bottleCount;
+      toast(`✨ Looks like a case of ${w.bottleCount} — quantity set to ${w.bottleCount}. Check & save`);
+    } else {
+      toast('✨ Identified! Check the details, then save');
+    }
   } catch (e) {
     console.warn('identify failed', e);
     toast('Could not identify: ' + (e.message || e));

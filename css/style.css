@@ -4,6 +4,7 @@
    ============================================================ */
 
 :root {
+  /* Theme: Cellar (dark, default) */
   --bg: #160a10;
   --bg-soft: #1f0f17;
   --card: #26141d;
@@ -15,14 +16,90 @@
   --wine-bright: #c34a5e;
   --gold: #d4a95c;
   --gold-soft: rgba(212, 169, 92, 0.16);
-  --green: #6fbf8f;
-  --red: #e07070;
+  --glow: #3a1626;
+  --header-tint: rgba(58, 22, 38, 0.65);
+  --tabbar-bg: rgba(22, 10, 16, 0.92);
+  --ok: #6fbf8f;
+  --info: #7fa8d9;
+  --warn: #e0b070;
+  --bad: #e07070;
+  --green: var(--ok);
+  --red: var(--bad);
   --radius: 18px;
   --radius-sm: 12px;
   --tabbar-h: 74px;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   color-scheme: dark;
+}
+
+/* Theme: Linen — warm cream, editorial */
+:root[data-theme="linen"] {
+  --bg: #f5efe3;
+  --bg-soft: #eee6d5;
+  --card: #fffdf7;
+  --card-2: #faf4e8;
+  --line: rgba(74, 48, 28, 0.14);
+  --text: #2e2018;
+  --text-dim: #8a7364;
+  --wine: #8e2a3f;
+  --wine-bright: #a63a50;
+  --gold: #96702a;
+  --gold-soft: rgba(150, 112, 42, 0.12);
+  --glow: #ecdcc0;
+  --header-tint: rgba(142, 42, 63, 0.08);
+  --tabbar-bg: rgba(255, 253, 247, 0.94);
+  --ok: #2e7d4f;
+  --info: #2f6ea5;
+  --warn: #a2691c;
+  --bad: #b3402e;
+  color-scheme: light;
+}
+
+/* Theme: Blanc — minimal white, black & crimson */
+:root[data-theme="blanc"] {
+  --bg: #fafafa;
+  --bg-soft: #f1f1f2;
+  --card: #ffffff;
+  --card-2: #fcfcfd;
+  --line: rgba(20, 20, 25, 0.11);
+  --text: #17181c;
+  --text-dim: #71767f;
+  --wine: #1f1f24;
+  --wine-bright: #3a3a42;
+  --gold: #b02940;
+  --gold-soft: rgba(176, 41, 64, 0.08);
+  --glow: #ececee;
+  --header-tint: rgba(20, 20, 25, 0.04);
+  --tabbar-bg: rgba(255, 255, 255, 0.94);
+  --ok: #1e7a45;
+  --info: #2b6cb0;
+  --warn: #9c6512;
+  --bad: #c0392b;
+  color-scheme: light;
+}
+
+/* Theme: Rosé — soft blush */
+:root[data-theme="rose"] {
+  --bg: #f9f0ee;
+  --bg-soft: #f3e6e3;
+  --card: #fffbfa;
+  --card-2: #fbf3f1;
+  --line: rgba(120, 60, 70, 0.13);
+  --text: #3a2530;
+  --text-dim: #96707d;
+  --wine: #c0576d;
+  --wine-bright: #d06e83;
+  --gold: #a87938;
+  --gold-soft: rgba(168, 121, 56, 0.12);
+  --glow: #f3d9d3;
+  --header-tint: rgba(192, 87, 109, 0.08);
+  --tabbar-bg: rgba(255, 251, 250, 0.94);
+  --ok: #2e7d4f;
+  --info: #3572a8;
+  --warn: #a2691c;
+  --bad: #b3402e;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -32,7 +109,7 @@ html { height: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   background:
-    radial-gradient(1200px 500px at 50% -10%, #3a1626 0%, transparent 60%),
+    radial-gradient(1200px 500px at 50% -10%, var(--glow) 0%, transparent 60%),
     var(--bg);
   color: var(--text);
   min-height: 100%;
@@ -51,7 +128,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 /* ---------- header / dashboard ---------- */
 .app-header {
   padding: calc(var(--sat) + 14px) 18px 14px;
-  background: linear-gradient(180deg, rgba(58, 22, 38, 0.65), transparent);
+  background: linear-gradient(180deg, var(--header-tint), transparent);
 }
 
 .header-top {
@@ -210,11 +287,11 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   color: var(--text-dim);
   white-space: nowrap;
 }
-.badge.gold { color: var(--gold); border-color: rgba(212,169,92,0.35); background: var(--gold-soft); }
-.badge.ready { color: var(--green); border-color: rgba(111,191,143,0.4); }
-.badge.hold { color: #7fa8d9; border-color: rgba(127,168,217,0.4); }
-.badge.soon { color: #e0b070; border-color: rgba(224,176,112,0.4); }
-.badge.past { color: var(--red); border-color: rgba(224,112,112,0.4); }
+.badge.gold { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 40%, transparent); background: var(--gold-soft); }
+.badge.ready { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.badge.hold { color: var(--info); border-color: color-mix(in srgb, var(--info) 40%, transparent); }
+.badge.soon { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.badge.past { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
 
 .wine-right {
   display: flex;
@@ -281,7 +358,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   left: 0; right: 0; bottom: 0;
   height: calc(var(--tabbar-h) + var(--sab));
   padding-bottom: var(--sab);
-  background: rgba(22, 10, 16, 0.92);
+  background: var(--tabbar-bg);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid var(--line);
@@ -313,7 +390,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   font-size: 26px;
   line-height: 44px;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(195, 74, 94, 0.4);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--wine-bright) 40%, transparent);
   margin-top: -18px;
 }
 
@@ -366,7 +443,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   align-items: center;
   justify-content: center;
   min-height: 110px;
-  border: 1.5px dashed rgba(212, 169, 92, 0.4);
+  border: 1.5px dashed color-mix(in srgb, var(--gold) 45%, transparent);
   border-radius: var(--radius);
   color: var(--gold);
   font-size: 14px;
@@ -425,7 +502,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 
 .mini-btn {
   background: var(--bg-soft);
-  border: 1px solid rgba(212, 169, 92, 0.35);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
   color: var(--gold);
   border-radius: 999px;
   padding: 6px 13px;
@@ -451,14 +528,18 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 .btn.primary {
   background: linear-gradient(160deg, var(--wine-bright), var(--wine));
   color: #fff;
-  box-shadow: 0 4px 14px rgba(195, 74, 94, 0.35);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--wine-bright) 35%, transparent);
 }
 .btn.ghost {
   background: var(--card);
   color: var(--text-dim);
   border: 1px solid var(--line);
 }
-.btn.danger { background: rgba(224, 112, 112, 0.15); color: var(--red); border: 1px solid rgba(224,112,112,0.4); }
+.btn.danger {
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  color: var(--bad);
+  border: 1px solid color-mix(in srgb, var(--bad) 40%, transparent);
+}
 
 /* ---------- wine detail ---------- */
 .detail-photo {
@@ -588,9 +669,14 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 .identify-btn {
   width: 100%;
   margin-top: 8px;
-  border-color: rgba(212, 169, 92, 0.35);
+  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
   color: var(--gold);
 }
+
+.field-hint { font-size: 12px; color: var(--gold); text-transform: none; letter-spacing: 0; }
+
+.qty-quick { display: flex; gap: 6px; margin-top: 6px; }
+.qty-quick .mini-btn { flex: 1; text-align: center; }
 
 /* ---------- toast ---------- */
 .toast {
@@ -599,7 +685,7 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   left: 50%;
   transform: translateX(-50%);
   background: var(--card-2);
-  border: 1px solid rgba(212, 169, 92, 0.4);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
   color: var(--text);
   padding: 11px 20px;
   border-radius: 999px;

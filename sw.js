@@ -1,5 +1,5 @@
 /* Service worker — offline-first app shell */
-const CACHE = 'cellar-v5';
+const CACHE = 'cellar-v6';
 const ASSETS = [
   './',
   './index.html',

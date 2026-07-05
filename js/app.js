@@ -17,7 +17,46 @@ let sortMode = 'added';
 
 const $ = (id) => document.getElementById(id);
 const CURRENCY_KEY = 'cellar-currency';
-let currency = localStorage.getItem(CURRENCY_KEY) || '€';
+let currency = localStorage.getItem(CURRENCY_KEY) || 'CHF';
+
+/* ---------------- pricing: VAT & FX ---------------- */
+const VAT_RATE = 0.081; // Swiss VAT 8.1%
+const FX_KEY = 'fx-eur-chf';
+const FX_FALLBACK = 0.94; // EUR → CHF fallback rate
+
+function fxRate() {
+  try {
+    const c = JSON.parse(localStorage.getItem(FX_KEY) || 'null');
+    if (c && c.rate > 0) return c.rate;
+  } catch { /* ignore */ }
+  return FX_FALLBACK;
+}
+
+async function refreshFx() {
+  try {
+    const c = JSON.parse(localStorage.getItem(FX_KEY) || 'null');
+    if (c && Date.now() - c.ts < 24 * 3600_000) return; // fresh enough
+    const r = await fetch('https://api.frankfurter.dev/v1/latest?base=EUR&symbols=CHF');
+    const j = await r.json();
+    const rate = j?.rates?.CHF;
+    if (rate > 0) {
+      localStorage.setItem(FX_KEY, JSON.stringify({ rate, ts: Date.now() }));
+      renderAll();
+    }
+  } catch { /* offline or blocked — keep cached/fallback rate */ }
+}
+
+/* market price in CHF, whatever currency it was entered in */
+function marketCHF(w) {
+  if (w.marketPrice == null) return null;
+  return (w.marketCurrency === 'EUR') ? w.marketPrice * fxRate() : w.marketPrice;
+}
+
+/* purchase price incl. 8.1% VAT (entered excl. VAT, in CHF) */
+function purchaseGross(w) {
+  if (w.purchasePrice == null) return null;
+  return w.purchasePrice * (1 + VAT_RATE);
+}
 
 const LOC_LABELS = {
   'boxed': '📦 Boxed',
@@ -76,7 +115,8 @@ function money(n) {
   if (n == null || isNaN(n)) return '—';
   const abs = Math.abs(n);
   const s = abs >= 1000 ? Math.round(abs).toLocaleString('en') : abs.toFixed(abs % 1 ? 2 : 0);
-  return (n < 0 ? '−' : '') + currency + s;
+  const sym = /[A-Za-z]$/.test(currency) ? currency + ' ' : currency;
+  return (n < 0 ? '−' : '') + sym + s;
 }
 
 function esc(s) {
@@ -109,8 +149,8 @@ function toast(msg) {
 function renderDashboard() {
   const cw = cellarWines();
   const bottles = cw.reduce((n, w) => n + w.quantity, 0);
-  const value = cw.reduce((n, w) => n + (w.marketPrice || w.purchasePrice || 0) * w.quantity, 0);
-  const cost = cw.reduce((n, w) => n + (w.purchasePrice || 0) * w.quantity, 0);
+  const value = cw.reduce((n, w) => n + (marketCHF(w) ?? purchaseGross(w) ?? 0) * w.quantity, 0);
+  const cost = cw.reduce((n, w) => n + (purchaseGross(w) ?? 0) * w.quantity, 0);
 
   $('statBottles').textContent = bottles;
   $('statValue').textContent = money(value);
@@ -147,7 +187,7 @@ function renderList() {
     switch (sortMode) {
       case 'name': return (a.name || '').localeCompare(b.name || '');
       case 'vintage': return (a.vintage || 9999) - (b.vintage || 9999);
-      case 'value': return ((b.marketPrice || 0) * b.quantity) - ((a.marketPrice || 0) * a.quantity);
+      case 'value': return ((marketCHF(b) || 0) * b.quantity) - ((marketCHF(a) || 0) * a.quantity);
       case 'window': return (a.drinkTo || 9999) - (b.drinkTo || 9999);
       default: return (b.createdAt || 0) - (a.createdAt || 0);
     }
@@ -187,7 +227,7 @@ function wineCard(w) {
       <div class="wine-badges">${badges.join('')}</div>
     </div>
     <div class="wine-right">
-      <div class="wine-price">${money(w.marketPrice)}</div>
+      <div class="wine-price">${money(marketCHF(w))}</div>
       <div class="wine-qty">× ${w.quantity}</div>
     </div>
   </article>`;
@@ -251,7 +291,9 @@ function openDetail(id) {
   const pairings = getPairings(w);
   const inCellar = w.status === 'cellar' && w.quantity > 0;
 
-  const gain = (w.marketPrice != null && w.purchasePrice != null) ? w.marketPrice - w.purchasePrice : null;
+  const mkt = marketCHF(w);
+  const gross = purchaseGross(w);
+  const gain = (mkt != null && gross != null) ? mkt - gross : null;
   const q = encodeURIComponent([w.name, w.vintage].filter(Boolean).join(' '));
 
   const infoCells = [
@@ -264,8 +306,9 @@ function openDetail(id) {
     (w.drinkFrom || w.drinkTo) && cell('Drinking window', `${w.drinkFrom || '…'} – ${w.drinkTo || '…'}`),
     w.ratingVivino && cell('Vivino', '★ ' + w.ratingVivino + ' / 5'),
     w.ratingCritic && cell('Critic score', w.ratingCritic + ' / 100'),
-    w.marketPrice != null && cell('Market price', money(w.marketPrice), 'gold'),
-    w.purchasePrice != null && cell('Purchase price', money(w.purchasePrice)),
+    mkt != null && cell('Market price', money(mkt) + (w.marketCurrency === 'EUR' ? ` (€${w.marketPrice})` : ''), 'gold'),
+    gross != null && cell('Purchase incl. 8.1% VAT', money(gross)),
+    w.purchasePrice != null && cell('Purchase excl. VAT (as paid)', money(w.purchasePrice)),
     gain != null && cell('Gain per bottle', (gain >= 0 ? '+' : '') + money(gain).replace('−', '-'), gain >= 0 ? 'pos' : 'neg'),
     w.purchaseDate && cell('Purchased', w.purchaseDate),
     inCellar && cell('Location', LOC_LABELS[w.location]),
@@ -349,7 +392,9 @@ function openForm(id) {
   $('f-ratingVivino').value = w?.ratingVivino || '';
   $('f-ratingCritic').value = w?.ratingCritic || '';
   $('f-marketPrice').value = w?.marketPrice ?? '';
+  $('f-marketCurrency').value = w?.marketCurrency || 'CHF';
   $('f-purchasePrice').value = w?.purchasePrice ?? '';
+  updateVatHint();
   $('f-purchaseDate').value = w?.purchaseDate || '';
   $('f-location').value = w?.location || 'boxed';
   $('f-edulisNotes').value = w?.edulisNotes || '';
@@ -400,7 +445,9 @@ async function saveForm(e) {
     ratingVivino: num($('f-ratingVivino').value),
     ratingCritic: int($('f-ratingCritic').value),
     marketPrice: num($('f-marketPrice').value),
-    purchasePrice: num($('f-purchasePrice').value),
+    marketCurrency: $('f-marketCurrency').value,
+    purchasePrice: num($('f-purchasePrice').value), // CHF, excl. VAT as entered
+    vatRate: VAT_RATE,
     purchaseDate: $('f-purchaseDate').value || null,
     location: $('f-location').value,
     edulisNotes: $('f-edulisNotes').value.trim(),
@@ -479,7 +526,7 @@ async function saveDrink(e) {
     date: $('d-date').value || new Date().toISOString().slice(0, 10),
     note: $('d-note').value.trim(),
     rating: isNaN(rating) ? null : rating,
-    priceAtDrink: w.marketPrice || w.purchasePrice || 0,
+    priceAtDrink: marketCHF(w) ?? purchaseGross(w) ?? 0,
   };
 
   w.quantity = Math.max(0, w.quantity - 1);
@@ -574,6 +621,25 @@ async function importData(file) {
   toast(`Imported ${payload.wines.length} wine${payload.wines.length === 1 ? '' : 's'}`);
 }
 
+function updateVatHint() {
+  const hint = $('vatHint');
+  if (!hint) return;
+  const net = parseFloat($('f-purchasePrice').value);
+  hint.textContent = isNaN(net) ? '' : `incl. 8.1% VAT: ${money(net * (1 + VAT_RATE))}`;
+}
+
+/* ---------------- theme ---------------- */
+const THEME_KEY = 'cellar-theme';
+
+function applyTheme(name) {
+  document.documentElement.dataset.theme = name;
+  localStorage.setItem(THEME_KEY, name);
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg);
+  document.querySelectorAll('#themeRow .chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.themepick === name));
+}
+
 /* ---------------- sheets & navigation ---------------- */
 const SHEETS = ['detail', 'form', 'drink', 'settings'];
 
@@ -599,6 +665,19 @@ function switchView(name) {
 /* ---------------- events ---------------- */
 document.addEventListener('DOMContentLoaded', () => {
   boot();
+  refreshFx();
+  applyTheme(localStorage.getItem(THEME_KEY) || 'cellar');
+
+  // theme picker
+  $('themeRow')?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (chip) applyTheme(chip.dataset.themepick);
+  });
+
+  // VAT hint + quick quantity buttons
+  $('f-purchasePrice').addEventListener('input', updateVatHint);
+  document.querySelectorAll('.qty-quick .mini-btn').forEach(b =>
+    b.addEventListener('click', () => { $('f-quantity').value = b.dataset.qty; }));
 
   // tabs
   document.querySelectorAll('.tab[data-view]').forEach(t =>

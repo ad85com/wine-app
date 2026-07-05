@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="AD's Cellar">
 <meta name="theme-color" content="#160a10">
 <title>AD's Cellar</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('cellar-theme') || 'cellar';</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -213,6 +214,12 @@
               <option value="imperiale">Impériale (6 L)</option>
             </select>
           </div>
+          <div class="qty-quick">
+            <button type="button" class="mini-btn" data-qty="1">×1</button>
+            <button type="button" class="mini-btn" data-qty="3">Box ×3</button>
+            <button type="button" class="mini-btn" data-qty="6">Box ×6</button>
+            <button type="button" class="mini-btn" data-qty="12">Box ×12</button>
+          </div>
         </div>
 
         <div class="field-group span2">
@@ -231,13 +238,20 @@
           </div>
         </div>
 
-        <label class="field">
-          <span>Market price (€/btl)</span>
-          <input type="number" id="f-marketPrice" step="0.01" min="0" placeholder="45.00">
-        </label>
-        <label class="field">
-          <span>Purchase price (€/btl)</span>
+        <div class="field-group span2">
+          <span class="group-label">Market price (per bottle)</span>
+          <div class="pair">
+            <input type="number" id="f-marketPrice" step="0.01" min="0" placeholder="45.00">
+            <select id="f-marketCurrency">
+              <option value="CHF" selected>CHF</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+        <label class="field span2">
+          <span>Purchase price (CHF per bottle, excl. VAT)</span>
           <input type="number" id="f-purchasePrice" step="0.01" min="0" placeholder="32.00">
+          <span class="field-hint" id="vatHint"></span>
         </label>
         <label class="field span2">
           <span>Purchase date</span>
@@ -303,6 +317,16 @@
   <div class="sheet-handle"></div>
   <div class="sheet-content">
     <h2 class="sheet-title">Backup &amp; settings</h2>
+
+    <div class="settings-section">
+      <h3 class="settings-h">🎨 Theme</h3>
+      <div class="filter-row" id="themeRow">
+        <button class="chip" data-themepick="cellar">🍷 Cellar (dark)</button>
+        <button class="chip" data-themepick="linen">🌾 Linen</button>
+        <button class="chip" data-themepick="blanc">⚪ Blanc</button>
+        <button class="chip" data-themepick="rose">🌸 Rosé</button>
+      </div>
+    </div>
 
     <div class="settings-section">
       <h3 class="settings-h">☁️ Sync between iPhone &amp; iPad</h3>
