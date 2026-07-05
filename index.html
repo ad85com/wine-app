@@ -312,15 +312,12 @@
           <span>Email</span>
           <input type="email" id="syncEmail" placeholder="you@example.com" autocomplete="email">
         </label>
-        <button class="btn primary sync-btn" id="syncSendCode">Send login code</button>
-        <div id="sync-codeRow" class="hidden">
-          <label class="field">
-            <span>Code from the email</span>
-            <input type="text" id="syncCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456">
-          </label>
-          <button class="btn primary sync-btn" id="syncVerify">Verify &amp; start syncing</button>
-        </div>
-        <p class="settings-note">Sign in with the same email on each device and your cellar stays in sync automatically.</p>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" id="syncPassword" placeholder="6+ characters" autocomplete="current-password">
+        </label>
+        <button class="btn primary sync-btn" id="syncSignIn">Sign in / create account</button>
+        <p class="settings-note">First time: this creates your account. Then sign in with the same email &amp; password on each device and your cellar stays in sync automatically.</p>
       </div>
       <div id="sync-signedin" class="hidden">
         <p id="syncStatusLine" class="sync-status"></p>

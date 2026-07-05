@@ -28,10 +28,10 @@ All data is stored privately on your device and works fully offline.
   the wine, to grab current market prices and ratings.
 - **Backup** — export/import the whole collection (including photos and
   history) as a single JSON file.
-- **Cross-device sync** — sign in with an email one-time code (Supabase) and
-  your wines, history and label photos sync automatically between iPhone,
-  iPad and any other device. Data is protected by row-level security; only
-  your account can read it.
+- **Cross-device sync** — sign in with email + password (Supabase) and your
+  wines, history and label photos sync automatically between iPhone, iPad
+  and any other device. Data is protected by row-level security; only your
+  account can read it.
 - **AI label identification** — snap the label, tap "✨ Identify wine from
   photo" and Claude reads the label and pre-fills name, producer, vintage,
   region, grapes, drinking window and a tasting note — you review and save.
@@ -64,9 +64,9 @@ the enriched file back.
 
 The Supabase project URL and publishable key live in `js/config.js`. One-time
 setup in the Supabase dashboard: run the SQL in the project docs (tables
-`wines`, `drinks` + `labels` storage bucket with RLS), and add `{{ .Token }}`
-to **Authentication → Email Templates → Magic Link** so login emails include
-the 6-digit code the app asks for.
+`wines`, `drinks` + `labels` storage bucket with RLS), and — for instant
+password sign-up with no confirmation email — turn off **Confirm email**
+under **Authentication → Sign In / Providers → Email**.
 
 ## Data & privacy
 

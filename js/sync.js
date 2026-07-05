@@ -237,16 +237,28 @@ const SYNC = (() => {
   }
 
   /* ---------------- auth ---------------- */
-  async function sendCode(email) {
-    const { error } = await client.auth.signInWithOtp({ email });
-    if (error) throw error;
-  }
-
-  async function verifyCode(email, code) {
-    const { error } = await client.auth.verifyOtp({ email, token: code.trim(), type: 'email' });
-    if (error) throw error;
-    // first successful login on a device with local data: upload it all
-    await pushEverything();
+  async function signIn(email, password) {
+    const { error } = await client.auth.signInWithPassword({ email, password });
+    if (!error) {
+      await pushEverything();
+      return 'Signed in — syncing your cellar ✓';
+    }
+    if (/invalid login credentials/i.test(error.message || '')) {
+      // no account yet (or wrong password) — try creating one
+      const su = await client.auth.signUp({ email, password });
+      if (su.error) {
+        if (/already registered/i.test(su.error.message || '')) {
+          throw new Error('Wrong password for this account');
+        }
+        throw su.error;
+      }
+      if (!su.data.session) {
+        throw new Error('Account created — tap the confirmation link in your email, then sign in again');
+      }
+      await pushEverything();
+      return 'Account created — syncing your cellar ✓';
+    }
+    throw error;
   }
 
   async function signOut() {
@@ -289,40 +301,20 @@ const SYNC = (() => {
 
   /* ---------------- wire up settings controls ---------------- */
   document.addEventListener('DOMContentLoaded', () => {
-    const emailInput = document.getElementById('syncEmail');
-    const codeRow = document.getElementById('sync-codeRow');
-
-    document.getElementById('syncSendCode')?.addEventListener('click', async (e) => {
-      const email = emailInput.value.trim();
+    document.getElementById('syncSignIn')?.addEventListener('click', async (e) => {
+      const email = document.getElementById('syncEmail').value.trim();
+      const password = document.getElementById('syncPassword').value;
       if (!email || !email.includes('@')) { toast('Enter your email first'); return; }
+      if (!password || password.length < 6) { toast('Password needs at least 6 characters'); return; }
       e.target.disabled = true;
-      e.target.textContent = 'Sending…';
+      e.target.textContent = 'Signing in…';
       try {
-        await sendCode(email);
-        codeRow.classList.remove('hidden');
-        toast('Check your email for the code / link');
+        toast(await signIn(email, password));
       } catch (err) {
-        toast('Could not send: ' + (err.message || err));
+        toast(err.message || String(err));
       } finally {
         e.target.disabled = false;
-        e.target.textContent = 'Send login code';
-      }
-    });
-
-    document.getElementById('syncVerify')?.addEventListener('click', async (e) => {
-      const email = emailInput.value.trim();
-      const code = document.getElementById('syncCode').value;
-      if (!code) { toast('Enter the code from the email'); return; }
-      e.target.disabled = true;
-      e.target.textContent = 'Verifying…';
-      try {
-        await verifyCode(email, code);
-        toast('Signed in — syncing your cellar ✓');
-      } catch (err) {
-        toast('Code not accepted: ' + (err.message || err));
-      } finally {
-        e.target.disabled = false;
-        e.target.textContent = 'Verify & start syncing';
+        e.target.textContent = 'Sign in / create account';
       }
     });
 
