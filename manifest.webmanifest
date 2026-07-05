@@ -1,6 +1,6 @@
 {
-  "name": "AD Combloux Wine Cellar",
-  "short_name": "AD Combloux",
+  "name": "AD's Cellar",
+  "short_name": "AD's Cellar",
   "description": "Track your wine cellar: inventory, values, drinking windows, pairings and tasting history.",
   "start_url": "./index.html",
   "scope": "./",

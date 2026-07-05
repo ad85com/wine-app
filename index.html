@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AD Combloux">
+<meta name="apple-mobile-web-app-title" content="AD's Cellar">
 <meta name="theme-color" content="#160a10">
-<title>AD Combloux Wine Cellar</title>
+<title>AD's Cellar</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -18,7 +18,7 @@
 <!-- ======================= HEADER / DASHBOARD ======================= -->
 <header class="app-header" id="appHeader">
   <div class="header-top">
-    <h1 class="brand"><span class="brand-icon">🍷</span> AD Combloux <span class="brand-sub">Wine Cellar</span></h1>
+    <h1 class="brand"><span class="brand-icon">🍷</span> AD's <span class="brand-sub">Cellar</span></h1>
     <button class="icon-btn" id="settingsBtn" title="Backup &amp; settings" aria-label="Settings">⚙︎</button>
   </div>
   <div class="dashboard" id="dashboard">
@@ -188,9 +188,31 @@
           <input type="number" id="f-abv" step="0.1" min="0" max="25" placeholder="13.5">
         </label>
         <label class="field">
-          <span>Bottles</span>
-          <input type="number" id="f-quantity" min="1" value="1">
+          <span>Location</span>
+          <select id="f-location">
+            <option value="boxed">📦 Boxed</option>
+            <option value="top-left">↖ Top left</option>
+            <option value="top-right">↗ Top right</option>
+            <option value="bottom-left">↙ Bottom left</option>
+            <option value="bottom-right">↘ Bottom right</option>
+          </select>
         </label>
+
+        <div class="field-group span2">
+          <span class="group-label">Bottles × format</span>
+          <div class="pair">
+            <input type="number" id="f-quantity" min="1" value="1">
+            <select id="f-size">
+              <option value="piccolo">Piccolo (187.5 ml)</option>
+              <option value="demi">Demi-bouteille (375 ml)</option>
+              <option value="standard" selected>Standard (750 ml)</option>
+              <option value="magnum">Magnum (1.5 L)</option>
+              <option value="double-magnum">Double Magnum (3 L)</option>
+              <option value="jeroboam">Jéroboam (4.5 L)</option>
+              <option value="imperiale">Impériale (6 L)</option>
+            </select>
+          </div>
+        </div>
 
         <div class="field-group span2">
           <span class="group-label">Drinking window</span>
@@ -216,19 +238,9 @@
           <span>Purchase price (€/btl)</span>
           <input type="number" id="f-purchasePrice" step="0.01" min="0" placeholder="32.00">
         </label>
-        <label class="field">
+        <label class="field span2">
           <span>Purchase date</span>
           <input type="date" id="f-purchaseDate">
-        </label>
-        <label class="field">
-          <span>Location</span>
-          <select id="f-location">
-            <option value="boxed">📦 Boxed</option>
-            <option value="top-left">↖ Top left</option>
-            <option value="top-right">↗ Top right</option>
-            <option value="bottom-left">↙ Bottom left</option>
-            <option value="bottom-right">↘ Bottom right</option>
-          </select>
         </label>
 
         <label class="field span2">

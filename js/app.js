@@ -28,6 +28,20 @@ const LOC_LABELS = {
 };
 
 const STYLE_LABELS = { red: 'Red', white: 'White', rose: 'Rosé', sparkling: 'Sparkling', sweet: 'Sweet', fortified: 'Fortified' };
+
+const SIZE_LABELS = {
+  'piccolo': 'Piccolo (187.5 ml)',
+  'demi': 'Demi-bouteille (375 ml)',
+  'standard': 'Standard (750 ml)',
+  'magnum': 'Magnum (1.5 L)',
+  'double-magnum': 'Double Magnum (3 L)',
+  'jeroboam': 'Jéroboam (4.5 L)',
+  'imperiale': 'Impériale (6 L)',
+};
+const SIZE_SHORT = {
+  'piccolo': 'Piccolo', 'demi': 'Demi', 'standard': '750 ml', 'magnum': 'Magnum',
+  'double-magnum': 'Dbl Magnum', 'jeroboam': 'Jéroboam', 'imperiale': 'Impériale',
+};
 const STYLE_ICONS = { red: '🍷', white: '🥂', rose: '🌸', sparkling: '🍾', sweet: '🍯', fortified: '🥃' };
 
 /* ---------------- boot ---------------- */
@@ -121,7 +135,9 @@ function renderList() {
   if (searchTerm) {
     const q = searchTerm.toLowerCase();
     list = list.filter(w =>
-      [w.name, w.producer, w.region, w.country, w.appellation, (w.grapes || []).join(' '), String(w.vintage || '')]
+      [w.name, w.producer, w.region, w.country, w.appellation, (w.grapes || []).join(' '),
+       String(w.vintage || ''), STYLE_LABELS[w.style], SIZE_SHORT[w.size], SIZE_LABELS[w.size],
+       w.edulisNotes, w.notes]
         .join(' ').toLowerCase().includes(q));
   }
 
@@ -153,6 +169,7 @@ function wineCard(w) {
 
   const badges = [];
   if (w.vintage) badges.push(`<span class="badge">${w.vintage}</span>`);
+  if (w.size && w.size !== 'standard') badges.push(`<span class="badge gold">${SIZE_SHORT[w.size] || esc(w.size)}</span>`);
   if (w.region) badges.push(`<span class="badge">${esc(w.region)}</span>`);
   if (w.ratingVivino) badges.push(`<span class="badge gold">★ ${w.ratingVivino}</span>`);
   if (w.ratingCritic) badges.push(`<span class="badge gold">${w.ratingCritic} pts</span>`);
@@ -241,6 +258,7 @@ function openDetail(id) {
     (w.region || w.country) && cell('Region', [w.appellation || w.region, w.country].filter(Boolean).join(', ')),
     (w.grapes || []).length && cell('Grapes', w.grapes.join(', ')),
     w.abv && cell('ABV', w.abv + '%'),
+    w.size && cell('Bottle size', SIZE_LABELS[w.size] || w.size),
     (w.drinkFrom || w.drinkTo) && cell('Drinking window', `${w.drinkFrom || '…'} – ${w.drinkTo || '…'}`),
     w.ratingVivino && cell('Vivino', '★ ' + w.ratingVivino + ' / 5'),
     w.ratingCritic && cell('Critic score', w.ratingCritic + ' / 100'),
@@ -323,6 +341,7 @@ function openForm(id) {
   $('f-grapes').value = (w?.grapes || []).join(', ');
   $('f-abv').value = w?.abv || '';
   $('f-quantity').value = w?.quantity ?? 1;
+  $('f-size').value = w?.size || 'standard';
   $('f-drinkFrom').value = w?.drinkFrom || '';
   $('f-drinkTo').value = w?.drinkTo || '';
   $('f-ratingVivino').value = w?.ratingVivino || '';
@@ -373,6 +392,7 @@ async function saveForm(e) {
     grapes: $('f-grapes').value.split(',').map(s => s.trim()).filter(Boolean),
     abv: num($('f-abv').value),
     quantity: Math.max(0, int($('f-quantity').value) ?? 1),
+    size: $('f-size').value,
     drinkFrom: int($('f-drinkFrom').value),
     drinkTo: int($('f-drinkTo').value),
     ratingVivino: num($('f-ratingVivino').value),

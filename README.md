@@ -1,4 +1,4 @@
-# 🍷 AD Combloux Wine Cellar
+# 🍷 AD's Cellar
 
 A beautiful, mobile-first web app to track your wine cellar — inventory, values,
 drinking windows, tasting history, food pairings and cellar locations.
@@ -11,8 +11,8 @@ All data is stored privately on your device and works fully offline.
 
 - **Inventory** — add wines with a label photo (camera or upload) or by typing.
 - **Rich wine info** — producer, vintage, region, appellation, grapes, ABV,
-  style, drinking window, Vivino & critic ratings, market price, purchase
-  price & date, Edulis notes, and your own notes.
+  style, bottle format (piccolo → impériale), drinking window, Vivino & critic
+  ratings, market price, purchase price & date, Edulis notes, and your own notes.
 - **Cellar locations** — Boxed, Top left, Top right, Bottom left, Bottom right,
   with a tap-able cellar map showing bottle counts per zone.
   (Exact per-bottle rack positions are a planned upgrade.)
