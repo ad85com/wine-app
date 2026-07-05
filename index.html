@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cellar">
+<meta name="theme-color" content="#160a10">
+<title>Cellar — Wine Collection</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ======================= HEADER / DASHBOARD ======================= -->
+<header class="app-header" id="appHeader">
+  <div class="header-top">
+    <h1 class="brand"><span class="brand-icon">🍷</span> Cellar</h1>
+    <button class="icon-btn" id="settingsBtn" title="Backup &amp; settings" aria-label="Settings">⚙︎</button>
+  </div>
+  <div class="dashboard" id="dashboard">
+    <div class="stat">
+      <div class="stat-value" id="statBottles">0</div>
+      <div class="stat-label">Bottles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statValue">€0</div>
+      <div class="stat-label">Market value</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statCost">€0</div>
+      <div class="stat-label">Purchase cost</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statGain">—</div>
+      <div class="stat-label">Gain / loss</div>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= MAIN VIEWS ======================= -->
+<main class="main" id="main">
+
+  <!-- ---------- CELLAR LIST VIEW ---------- -->
+  <section class="view" id="view-cellar">
+    <div class="toolbar">
+      <input type="search" id="searchInput" class="search" placeholder="Search wines, regions, grapes…">
+      <select id="sortSelect" class="chip-select" aria-label="Sort">
+        <option value="added">Recently added</option>
+        <option value="name">Name A–Z</option>
+        <option value="vintage">Vintage</option>
+        <option value="value">Value ↓</option>
+        <option value="window">Drink first</option>
+      </select>
+    </div>
+    <div class="filter-row" id="filterStyles">
+      <button class="chip active" data-style="">All</button>
+      <button class="chip" data-style="red">Red</button>
+      <button class="chip" data-style="white">White</button>
+      <button class="chip" data-style="rose">Rosé</button>
+      <button class="chip" data-style="sparkling">Sparkling</button>
+      <button class="chip" data-style="sweet">Sweet</button>
+      <button class="chip" data-style="fortified">Fortified</button>
+    </div>
+    <div class="filter-row" id="filterLocations">
+      <button class="chip active" data-loc="">Everywhere</button>
+      <button class="chip" data-loc="boxed">📦 Boxed</button>
+      <button class="chip" data-loc="top-left">↖ Top left</button>
+      <button class="chip" data-loc="top-right">↗ Top right</button>
+      <button class="chip" data-loc="bottom-left">↙ Bottom left</button>
+      <button class="chip" data-loc="bottom-right">↘ Bottom right</button>
+    </div>
+    <div id="wineList" class="wine-list"></div>
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">🍾</div>
+      <p><strong>Your cellar is empty.</strong></p>
+      <p>Tap <em>＋ Add</em> below to add your first wine — snap the label or type it in.</p>
+    </div>
+  </section>
+
+  <!-- ---------- HISTORY VIEW ---------- -->
+  <section class="view hidden" id="view-history">
+    <h2 class="view-title">Drinking history</h2>
+    <div class="history-stats" id="historyStats"></div>
+    <div id="historyList" class="wine-list"></div>
+    <div id="historyEmpty" class="empty-state hidden">
+      <div class="empty-icon">🥂</div>
+      <p>No bottles enjoyed yet. When you drink a bottle, mark it from the wine's page and it will appear here.</p>
+    </div>
+  </section>
+
+  <!-- ---------- CELLAR MAP VIEW ---------- -->
+  <section class="view hidden" id="view-map">
+    <h2 class="view-title">Cellar map</h2>
+    <p class="view-sub">Where your bottles live. Tap a zone to see its wines.</p>
+    <div class="cellar-map">
+      <div class="map-grid">
+        <button class="map-zone" data-loc="top-left"><span class="zone-name">↖ Top left</span><span class="zone-count" id="zone-top-left">0</span></button>
+        <button class="map-zone" data-loc="top-right"><span class="zone-name">↗ Top right</span><span class="zone-count" id="zone-top-right">0</span></button>
+        <button class="map-zone" data-loc="bottom-left"><span class="zone-name">↙ Bottom left</span><span class="zone-count" id="zone-bottom-left">0</span></button>
+        <button class="map-zone" data-loc="bottom-right"><span class="zone-name">↘ Bottom right</span><span class="zone-count" id="zone-bottom-right">0</span></button>
+      </div>
+      <button class="map-zone map-boxed" data-loc="boxed"><span class="zone-name">📦 Boxed / not racked</span><span class="zone-count" id="zone-boxed">0</span></button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================= TAB BAR ======================= -->
+<nav class="tabbar">
+  <button class="tab active" data-view="cellar"><span class="tab-icon">🍷</span>Cellar</button>
+  <button class="tab tab-add" id="addBtn"><span class="tab-add-circle">＋</span>Add</button>
+  <button class="tab" data-view="map"><span class="tab-icon">🗺</span>Map</button>
+  <button class="tab" data-view="history"><span class="tab-icon">🥂</span>History</button>
+</nav>
+
+<!-- ======================= WINE DETAIL SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="detailBackdrop"></div>
+<div class="sheet hidden" id="detailSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content" id="detailContent"></div>
+</div>
+
+<!-- ======================= ADD / EDIT SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="formBackdrop"></div>
+<div class="sheet sheet-tall hidden" id="formSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <h2 id="formTitle" class="sheet-title">Add wine</h2>
+
+    <form id="wineForm" autocomplete="off">
+      <input type="hidden" id="f-id">
+
+      <!-- photo -->
+      <div class="photo-row">
+        <label class="photo-drop" id="photoDrop">
+          <img id="photoPreview" class="hidden" alt="Label photo">
+          <span id="photoHint">📷 Snap or upload the label</span>
+          <input type="file" id="f-photo" accept="image/*" hidden>
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label class="field span2">
+          <span>Wine name *</span>
+          <input type="text" id="f-name" required placeholder="e.g. Château Margaux">
+        </label>
+        <label class="field">
+          <span>Producer</span>
+          <input type="text" id="f-producer" placeholder="Domaine / winery">
+        </label>
+        <label class="field">
+          <span>Vintage</span>
+          <input type="number" id="f-vintage" min="1900" max="2035" placeholder="2019">
+        </label>
+        <label class="field">
+          <span>Style</span>
+          <select id="f-style">
+            <option value="red">Red</option>
+            <option value="white">White</option>
+            <option value="rose">Rosé</option>
+            <option value="sparkling">Sparkling</option>
+            <option value="sweet">Sweet</option>
+            <option value="fortified">Fortified</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Country</span>
+          <input type="text" id="f-country" placeholder="France">
+        </label>
+        <label class="field">
+          <span>Region</span>
+          <input type="text" id="f-region" placeholder="Bordeaux">
+        </label>
+        <label class="field">
+          <span>Appellation</span>
+          <input type="text" id="f-appellation" placeholder="Margaux AOC">
+        </label>
+        <label class="field span2">
+          <span>Grapes <small>(comma separated)</small></span>
+          <input type="text" id="f-grapes" placeholder="Cabernet Sauvignon, Merlot">
+        </label>
+        <label class="field">
+          <span>ABV %</span>
+          <input type="number" id="f-abv" step="0.1" min="0" max="25" placeholder="13.5">
+        </label>
+        <label class="field">
+          <span>Bottles</span>
+          <input type="number" id="f-quantity" min="1" value="1">
+        </label>
+
+        <div class="field-group span2">
+          <span class="group-label">Drinking window</span>
+          <div class="pair">
+            <input type="number" id="f-drinkFrom" min="1990" max="2080" placeholder="From (2024)">
+            <input type="number" id="f-drinkTo" min="1990" max="2080" placeholder="To (2035)">
+          </div>
+        </div>
+
+        <div class="field-group span2">
+          <span class="group-label">Ratings</span>
+          <div class="pair">
+            <input type="number" id="f-ratingVivino" step="0.1" min="0" max="5" placeholder="Vivino /5">
+            <input type="number" id="f-ratingCritic" step="1" min="0" max="100" placeholder="Critic /100">
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Market price (€/btl)</span>
+          <input type="number" id="f-marketPrice" step="0.01" min="0" placeholder="45.00">
+        </label>
+        <label class="field">
+          <span>Purchase price (€/btl)</span>
+          <input type="number" id="f-purchasePrice" step="0.01" min="0" placeholder="32.00">
+        </label>
+        <label class="field">
+          <span>Purchase date</span>
+          <input type="date" id="f-purchaseDate">
+        </label>
+        <label class="field">
+          <span>Location</span>
+          <select id="f-location">
+            <option value="boxed">📦 Boxed</option>
+            <option value="top-left">↖ Top left</option>
+            <option value="top-right">↗ Top right</option>
+            <option value="bottom-left">↙ Bottom left</option>
+            <option value="bottom-right">↘ Bottom right</option>
+          </select>
+        </label>
+
+        <label class="field span2">
+          <span>Edulis notes</span>
+          <textarea id="f-edulisNotes" rows="2" placeholder="Notes from Edulis…"></textarea>
+        </label>
+        <label class="field span2">
+          <span>My notes</span>
+          <textarea id="f-notes" rows="2" placeholder="Anything else…"></textarea>
+        </label>
+      </div>
+
+      <div class="lookup-row" id="lookupRow">
+        <span class="lookup-label">Fill in details from:</span>
+        <button type="button" class="mini-btn" id="lookupWS">Wine-Searcher</button>
+        <button type="button" class="mini-btn" id="lookupVivino">Vivino</button>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelForm">Cancel</button>
+        <button type="submit" class="btn primary" id="saveForm">Save wine</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= DRINK BOTTLE SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="drinkBackdrop"></div>
+<div class="sheet hidden" id="drinkSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <h2 class="sheet-title">🥂 Drink a bottle</h2>
+    <p id="drinkWineName" class="drink-wine-name"></p>
+    <form id="drinkForm">
+      <input type="hidden" id="d-id">
+      <label class="field">
+        <span>Date</span>
+        <input type="date" id="d-date">
+      </label>
+      <label class="field">
+        <span>Occasion / tasting note</span>
+        <textarea id="d-note" rows="3" placeholder="Dinner with… tasted like…"></textarea>
+      </label>
+      <label class="field">
+        <span>My rating (0–5)</span>
+        <input type="number" id="d-rating" step="0.5" min="0" max="5" placeholder="4.5">
+      </label>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelDrink">Cancel</button>
+        <button type="submit" class="btn primary">Mark as drunk</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= SETTINGS SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="settingsBackdrop"></div>
+<div class="sheet hidden" id="settingsSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <h2 class="sheet-title">Backup &amp; settings</h2>
+    <div class="settings-list">
+      <button class="settings-item" id="exportBtn">
+        <span>⬇️ Export collection (JSON)</span>
+        <small>Full backup incl. photos &amp; history</small>
+      </button>
+      <button class="settings-item" id="importBtn">
+        <span>⬆️ Import collection</span>
+        <small>Restore or merge from a backup file</small>
+      </button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+      <label class="settings-item settings-inline">
+        <span>💶 Currency symbol</span>
+        <input type="text" id="currencyInput" maxlength="3" class="currency-input">
+      </label>
+    </div>
+    <p class="settings-note">All data is stored privately on this device. Export regularly to keep a backup.</p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/db.js"></script>
+<script src="js/pairings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
