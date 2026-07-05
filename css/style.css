@@ -60,8 +60,9 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
   justify-content: space-between;
 }
 
-.brand { font-size: 26px; font-weight: 600; }
-.brand-icon { font-size: 22px; margin-right: 2px; }
+.brand { font-size: 22px; font-weight: 600; }
+.brand-icon { font-size: 19px; margin-right: 2px; }
+.brand-sub { color: var(--gold); font-weight: 400; font-style: italic; }
 
 .icon-btn {
   background: var(--card);

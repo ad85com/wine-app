@@ -1,4 +1,4 @@
-# 🍷 Cellar — Wine Collection Tracker
+# 🍷 AD Combloux Wine Cellar
 
 A beautiful, mobile-first web app to track your wine cellar — inventory, values,
 drinking windows, tasting history, food pairings and cellar locations.
