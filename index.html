@@ -122,6 +122,7 @@
 <div class="sheet-backdrop hidden" id="detailBackdrop"></div>
 <div class="sheet hidden" id="detailSheet" role="dialog" aria-modal="true">
   <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="detail" aria-label="Close">✕</button>
   <div class="sheet-content" id="detailContent"></div>
 </div>
 
@@ -129,6 +130,7 @@
 <div class="sheet-backdrop hidden" id="formBackdrop"></div>
 <div class="sheet sheet-tall hidden" id="formSheet" role="dialog" aria-modal="true">
   <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="form" aria-label="Close">✕</button>
   <div class="sheet-content">
     <h2 id="formTitle" class="sheet-title">Add wine</h2>
 
@@ -158,6 +160,7 @@
           <span>Vintage</span>
           <input type="number" id="f-vintage" min="1900" max="2035" placeholder="2019">
         </label>
+        <button type="button" class="btn ghost identify-btn span2" id="fetchByNameBtn">✨ Fetch details from name &amp; vintage</button>
         <label class="field">
           <span>Style</span>
           <select id="f-style">
@@ -294,6 +297,7 @@
 <div class="sheet-backdrop hidden" id="drinkBackdrop"></div>
 <div class="sheet hidden" id="drinkSheet" role="dialog" aria-modal="true">
   <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="drink" aria-label="Close">✕</button>
   <div class="sheet-content">
     <h2 class="sheet-title">🥂 Drink a bottle</h2>
     <p id="drinkWineName" class="drink-wine-name"></p>
@@ -323,6 +327,7 @@
 <div class="sheet-backdrop hidden" id="settingsBackdrop"></div>
 <div class="sheet hidden" id="settingsSheet" role="dialog" aria-modal="true">
   <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="settings" aria-label="Close">✕</button>
   <div class="sheet-content">
     <h2 class="sheet-title">Backup &amp; settings</h2>
 

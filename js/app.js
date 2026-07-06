@@ -768,6 +768,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // detail
   $('detailBackdrop').addEventListener('click', () => closeSheet('detail'));
 
+  // close buttons on all sheets
+  document.querySelectorAll('.sheet-close').forEach(b =>
+    b.addEventListener('click', () => closeSheet(b.dataset.close)));
+
   // settings
   $('settingsBtn').addEventListener('click', () => openSheet('settings'));
   $('settingsBackdrop').addEventListener('click', () => closeSheet('settings'));
