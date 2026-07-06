@@ -38,6 +38,14 @@ from. Apply both treatments.
    75cl→`standard`, 150cl→`magnum`, 37.5cl→`demi`).
 6. If the email carries tasting notes, also fill the Edulis note fields
    (below).
+6b. **Bottle photo (when tooling allows):** Edulis emails embed bottle
+   images as attachments (visible via `get_thread` attachment IDs). The
+   Gmail MCP toolset currently has NO attachment-download tool — check
+   each session whether one has appeared (ToolSearch "gmail attachment").
+   If it exists: download the bottle image, resize to ≤1000px JPEG, and
+   set it as the wine's photo (import `photos` map as data URL, or upload
+   to the `labels` bucket + set `photoRev` when writing directly). Until
+   then, wines import without photos and the owner snaps the bottle.
 7. Report to the owner: wines created/topped up with quantities and prices,
    plus anything ambiguous that needs their confirmation.
 
