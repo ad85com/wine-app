@@ -19,10 +19,10 @@ from. Apply both treatments.
 
 1. Extract each line item: wine name, producer, vintage, bottle format,
    **quantity** (Edulis sells in cases of 3/6/12), and **unit price in CHF**.
-2. **VAT**: the app stores `purchasePrice` excl. VAT and shows/computes the
-   8.1% gross itself. Edulis prices are normally incl. VAT — store
-   `price / 1.081` (rounded to 2 dp) as `purchasePrice`. If the email
-   explicitly says "hors TVA / excl. VAT", store as-is.
+2. **VAT**: Edulis prices are **excl. VAT** — store the email's unit price
+   directly as `purchasePrice` (the app stores excl.-VAT prices and adds
+   the 8.1% Swiss VAT itself for all displays and totals). Do NOT divide
+   or otherwise adjust the price.
 3. `purchaseDate` = the original order email date (YYYY-MM-DD).
 4. If the wine already exists in the collection (same name + vintage):
    **increase `quantity`** by the ordered amount and update purchase info
