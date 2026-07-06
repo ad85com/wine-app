@@ -327,6 +327,7 @@ function openDetail(id) {
 
   $('detailContent').innerHTML = `
     ${photo ? `<img class="detail-photo" src="${photo}" alt="Label">` : ''}
+    <button type="button" class="mini-btn detail-photo-btn" id="detailPhotoBtn">📷 ${photo ? 'Replace' : 'Add'} label photo</button>
     <div class="detail-name">${esc(w.name)}</div>
     <div class="detail-sub">${esc([w.producer, w.vintage].filter(Boolean).join(' · '))}</div>
     <div class="detail-badges">
@@ -371,6 +372,20 @@ function openDetail(id) {
   `;
 
   openSheet('detail');
+
+  $('detailPhotoBtn').addEventListener('click', () => $('detailPhotoInput').click());
+  $('detailPhotoInput').onchange = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      await setWinePhoto(w.id, await resizeImage(file));
+      openDetail(w.id); // re-render with the new photo
+      toast('Label photo saved 📷');
+    } catch (err) {
+      toast(err.message || 'Could not use that image');
+    }
+  };
 
   const edulisToggle = $('edulisToggle');
   if (edulisToggle) edulisToggle.addEventListener('click', () => {
@@ -483,6 +498,8 @@ async function saveForm(e) {
 
   if (!w.name) return;
   if (w.quantity > 0) w.status = 'cellar';
+  if (pendingPhoto) w.photoRev = Date.now();
+  else if (existing?.photoRev) w.photoRev = existing.photoRev;
 
   await db.put('wines', w);
   if (existing) Object.assign(existing, w); else wines.push(w);
@@ -501,30 +518,53 @@ async function saveForm(e) {
   toast(existing ? 'Wine updated' : `Added ${w.name} 🍷`);
 }
 
-/* Resize + compress the label photo before storing */
-function handlePhoto(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  const img = new Image();
-  const url = URL.createObjectURL(file);
-  img.onload = () => {
-    const MAX = 1000;
-    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob((blob) => {
-      URL.revokeObjectURL(url);
-      if (!blob) return;
-      pendingPhoto = blob;
-      const preview = $('photoPreview');
-      preview.src = URL.createObjectURL(blob);
-      preview.classList.remove('hidden');
-      $('photoHint').classList.add('hidden');
-    }, 'image/jpeg', 0.82);
-  };
-  img.onerror = () => URL.revokeObjectURL(url);
-  img.src = url;
+/* Resize + compress a photo to a storable JPEG blob */
+function resizeImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) return reject(new Error('Not an image'));
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 1000;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        blob ? resolve(blob) : reject(new Error('Could not process image'));
+      }, 'image/jpeg', 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image')); };
+    img.src = url;
+  });
+}
+
+/* Photo picked in the add/edit form: hold as pending until save */
+async function handlePhoto(file) {
+  try {
+    pendingPhoto = await resizeImage(file);
+    const preview = $('photoPreview');
+    preview.src = URL.createObjectURL(pendingPhoto);
+    preview.classList.remove('hidden');
+    $('photoHint').classList.add('hidden');
+  } catch { /* ignore invalid file */ }
+}
+
+/* Set/replace a wine's label photo immediately (from the detail page) */
+async function setWinePhoto(id, blob) {
+  await db.put('photos', { wineId: id, blob });
+  if (photoURLs[id]) URL.revokeObjectURL(photoURLs[id]);
+  photoURLs[id] = URL.createObjectURL(blob);
+  const w = wines.find(x => x.id === id);
+  if (w) {
+    w.photoRev = Date.now(); // lets other devices know to re-download the photo
+    w.updatedAt = Date.now();
+    await db.put('wines', w);
+  }
+  if (typeof SYNC !== 'undefined') { SYNC.markPhoto(id); if (w) SYNC.markWine(id); }
+  renderAll();
 }
 
 /* ---------------- drink a bottle ---------------- */

@@ -192,9 +192,14 @@ const SYNC = (() => {
         photoCandidates.push(row.id);
         changed = true;
       } else if ((row.data.updatedAt || 0) > (wines[i].updatedAt || 0)) {
+        const prevPhotoRev = wines[i].photoRev;
         wines[i] = row.data;
         await db.put('wines', row.data);
-        if (!photoURLs[row.id]) photoCandidates.push(row.id);
+        // fetch photo if we have none, or the label photo was replaced remotely
+        if (!photoURLs[row.id] || (row.data.photoRev && row.data.photoRev !== prevPhotoRev)) {
+          if (photoURLs[row.id]) { URL.revokeObjectURL(photoURLs[row.id]); delete photoURLs[row.id]; }
+          photoCandidates.push(row.id);
+        }
         changed = true;
       }
     }
