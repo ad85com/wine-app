@@ -68,6 +68,14 @@ setup in the Supabase dashboard: run the SQL in the project docs (tables
 password sign-up with no confirmation email — turn off **Confirm email**
 under **Authentication → Sign In / Providers → Email**.
 
+## Backups
+
+Three layers: (1) every device keeps the full collection locally,
+(2) Supabase holds the synced cloud copy, (3) a scheduled job inside
+Supabase (see `docs/supabase-weekly-backup.sql`) snapshots all wines and
+history weekly, keeping the last 12 snapshots. Manual JSON export in
+⚙︎ settings remains available as a fourth layer.
+
 ## Data & privacy
 
 Everything lives in your browser's IndexedDB — nothing leaves the device.

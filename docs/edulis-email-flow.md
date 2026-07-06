@@ -1,11 +1,47 @@
-# Edulis email → wine notes pipeline
+# Edulis email → cellar pipeline
 
-How Claude processes Edulis marketing emails forwarded to **claude@ad85.com**
-and files them against wines in AD's Cellar. This doc is the runbook for
-Claude sessions; the owner just forwards emails and says "process my Edulis
-emails".
+How Claude processes Edulis emails forwarded to **claude@ad85.com** and turns
+them into wines and notes in AD's Cellar. This doc is the runbook for Claude
+sessions; the owner just forwards emails and says "process my Edulis emails"
+(including the app password for that run).
 
-## Flow
+Two email kinds, detected from content:
+
+- **Order / purchase emails** (order confirmations, invoices, offers the
+  owner bought from) → **create or top-up wines** in the collection.
+- **Marketing / tasting-note emails** about a wine → **attach Edulis notes**
+  to the matching wine.
+
+Some emails are both — an offer with tasting notes that the owner ordered
+from. Apply both treatments.
+
+## Order emails → creating wines
+
+1. Extract each line item: wine name, producer, vintage, bottle format,
+   **quantity** (Edulis sells in cases of 3/6/12), and **unit price in CHF**.
+2. **VAT**: the app stores `purchasePrice` excl. VAT and shows/computes the
+   8.1% gross itself. Edulis prices are normally incl. VAT — store
+   `price / 1.081` (rounded to 2 dp) as `purchasePrice`. If the email
+   explicitly says "hors TVA / excl. VAT", store as-is.
+3. `purchaseDate` = the original order email date (YYYY-MM-DD).
+4. If the wine already exists in the collection (same name + vintage):
+   **increase `quantity`** by the ordered amount and update purchase info
+   only if empty — don't clobber owner-entered data.
+5. If new: create the wine record. Fields from the email as above, plus
+   Claude enriches from its own knowledge / web research:
+   `style`, `country`, `region`, `appellation`, `grapes`, `abv`,
+   `drinkFrom`/`drinkTo`, and (when found) `ratingVivino`, `ratingCritic`,
+   `marketPrice` (+`marketCurrency`). `location` defaults to `boxed`.
+   Record shape: copy an existing row's `data` for reference; required
+   basics are `id` (e.g. `edulis-<timestamp>-<n>`), `status:'cellar'`,
+   `createdAt`/`updatedAt` (ms), `name`, `quantity`, `size` (map formats:
+   75cl→`standard`, 150cl→`magnum`, 37.5cl→`demi`).
+6. If the email carries tasting notes, also fill the Edulis note fields
+   (below).
+7. Report to the owner: wines created/topped up with quantities and prices,
+   plus anything ambiguous that needs their confirmation.
+
+## Marketing emails → Edulis notes
 
 1. Owner receives an Edulis marketing email about a wine, buys (or not),
    and forwards the email to `claude@ad85.com`.
