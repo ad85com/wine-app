@@ -624,10 +624,12 @@ async function importData(file) {
     await db.put('wines', w);
     const i = wines.findIndex(x => x.id === w.id);
     if (i >= 0) wines[i] = w; else wines.push(w);
+    if (typeof SYNC !== 'undefined') SYNC.markWine(w.id);
   }
   for (const d of (payload.drinks || [])) {
     await db.put('drinks', d);
     if (!drinks.find(x => x.id === d.id)) drinks.push(d);
+    if (typeof SYNC !== 'undefined') SYNC.markDrink(d.id);
   }
   for (const [wineId, dataURL] of Object.entries(payload.photos || {})) {
     try {
@@ -635,6 +637,7 @@ async function importData(file) {
       await db.put('photos', { wineId, blob });
       if (photoURLs[wineId]) URL.revokeObjectURL(photoURLs[wineId]);
       photoURLs[wineId] = URL.createObjectURL(blob);
+      if (typeof SYNC !== 'undefined') SYNC.markPhoto(wineId);
     } catch { /* skip broken photo */ }
   }
 
