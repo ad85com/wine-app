@@ -125,6 +125,20 @@ h1, h2, h3, .brand, .stat-value, .wine-name, .sheet-title, .detail-name {
 
 .hidden { display: none !important; }
 
+/* ---------- pull to refresh ---------- */
+.ptr {
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  margin-top: var(--sat);
+  color: var(--gold);
+  font-size: 13px;
+  transition: height 0.18s ease-out;
+}
+
 /* ---------- header / dashboard ---------- */
 .app-header {
   padding: calc(var(--sat) + 14px) 18px 14px;

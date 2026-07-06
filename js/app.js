@@ -95,8 +95,67 @@ async function boot() {
   if (typeof SYNC !== 'undefined') SYNC.init();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      swReg = reg;
+      // periodic update check while the app is open
+      setInterval(() => reg.update().catch(() => {}), 30 * 60_000);
+    }).catch(() => {});
+    // a new version took control → reload once to load the new code
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || swReloading) return; // first install, or already reloading
+      swReloading = true;
+      if ($('formSheet').classList.contains('hidden')) {
+        toast('App updated — reloading ✓');
+        setTimeout(() => location.reload(), 700);
+      }
+    });
   }
+}
+
+let swReg = null;
+let swReloading = false;
+
+/* ---------------- pull to refresh ---------------- */
+async function doRefresh() {
+  try { if (swReg) await swReg.update(); } catch { /* offline */ }
+  try { if (typeof SYNC !== 'undefined') await SYNC.syncNow(); } catch { /* ignore */ }
+  refreshFx();
+  renderAll();
+}
+
+function setupPullToRefresh() {
+  const ptr = $('ptr');
+  let startY = null;
+  let armed = false;
+
+  document.addEventListener('touchstart', (e) => {
+    const sheetOpen = document.querySelector('.sheet:not(.hidden)');
+    startY = (window.scrollY <= 0 && !sheetOpen) ? e.touches[0].clientY : null;
+    armed = false;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (startY == null) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 14 && window.scrollY <= 0) {
+      armed = dy > 75;
+      ptr.style.height = Math.min(dy * 0.4, 54) + 'px';
+      ptr.textContent = armed ? '↻ Release to refresh' : '↓ Pull to refresh';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', async () => {
+    if (startY == null) return;
+    startY = null;
+    if (!armed) { ptr.style.height = '0px'; return; }
+    armed = false;
+    ptr.textContent = '⟳ Refreshing…';
+    ptr.style.height = '44px';
+    await doRefresh();
+    ptr.style.height = '0px';
+    if (!swReloading) toast('Up to date ✓');
+  });
 }
 
 function renderAll() {
@@ -737,6 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
   boot();
   refreshFx();
   applyTheme(localStorage.getItem(THEME_KEY) || 'cellar');
+  setupPullToRefresh();
 
   // theme picker
   $('themeRow')?.addEventListener('click', (e) => {
