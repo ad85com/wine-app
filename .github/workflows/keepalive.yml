@@ -1,0 +1,23 @@
+# Keeps the Supabase free-tier project active so it is never auto-paused
+# for inactivity (7-day threshold). Pings the REST API twice a week; the
+# publishable key is public by design and RLS means the query returns no
+# data — it just registers as activity.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 6 * * 1,4' # Mondays & Thursdays, 06:17 UTC
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "https://eazjffelwmagefllbcyy.supabase.co/rest/v1/wines?select=id&limit=1" \
+            -H "apikey: sb_publishable_BI8PMoGziMLL_UwFg3NIjQ_EG9AWqtP" \
+            -H "Authorization: Bearer sb_publishable_BI8PMoGziMLL_UwFg3NIjQ_EG9AWqtP")
+          echo "Supabase answered HTTP $code"
+          test "$code" = "200"
