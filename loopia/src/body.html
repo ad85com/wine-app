@@ -1,0 +1,389 @@
+<div id="ptr" class="ptr"></div>
+<div id="netBanner" class="net-banner hidden"></div>
+
+<!-- ======================= HEADER / DASHBOARD ======================= -->
+<header class="app-header" id="appHeader">
+  <div class="header-top">
+    <h1 class="brand"><span class="brand-icon">🍷</span> AD's <span class="brand-sub">Cellar</span></h1>
+    <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙︎</button>
+  </div>
+  <div class="dashboard" id="dashboard">
+    <div class="stat">
+      <div class="stat-value" id="statBottles">0</div>
+      <div class="stat-label">Bottles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statValue">CHF 0</div>
+      <div class="stat-label">Market value</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statCost">CHF 0</div>
+      <div class="stat-label">Purchase cost</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="statGain">—</div>
+      <div class="stat-label">Gain / loss</div>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= MAIN VIEWS ======================= -->
+<main class="main" id="main">
+
+  <!-- ---------- CELLAR LIST VIEW ---------- -->
+  <section class="view" id="view-cellar">
+    <div class="toolbar">
+      <input type="search" id="searchInput" class="search" placeholder="Search wines, regions, grapes…">
+      <select id="sortSelect" class="chip-select" aria-label="Sort">
+        <option value="added">Recently added</option>
+        <option value="name">Name A–Z</option>
+        <option value="vintage">Vintage</option>
+        <option value="value">Value ↓</option>
+        <option value="window">Drink first</option>
+      </select>
+    </div>
+    <div class="filter-row" id="filterStyles">
+      <button class="chip active" data-style="">All</button>
+      <button class="chip" data-style="red">Red</button>
+      <button class="chip" data-style="white">White</button>
+      <button class="chip" data-style="rose">Rosé</button>
+      <button class="chip" data-style="sparkling">Sparkling</button>
+      <button class="chip" data-style="sweet">Sweet</button>
+      <button class="chip" data-style="fortified">Fortified</button>
+    </div>
+    <div class="filter-row" id="filterRacks"></div>
+    <div id="wineList" class="wine-list"></div>
+    <div id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">🍾</div>
+      <p><strong>Your cellar is empty.</strong></p>
+      <p>Tap <em>＋ Add</em> below — snap the label or type name &amp; vintage and let the details fill themselves.</p>
+    </div>
+  </section>
+
+  <!-- ---------- RACKS VIEW ---------- -->
+  <section class="view hidden" id="view-racks">
+    <h2 class="view-title">Racks</h2>
+    <p class="view-sub">Every bottle in its exact slot. Tap an empty slot to place a bottle, a full one to inspect.</p>
+    <div id="placingBanner" class="placing-banner hidden">
+      <span id="placingText"></span>
+      <button class="mini-btn" id="placingCancel">Cancel</button>
+    </div>
+    <div id="racksList"></div>
+    <button class="btn ghost add-rack-btn" id="addRackBtn">＋ Add rack / fridge / case</button>
+  </section>
+
+  <!-- ---------- HISTORY VIEW ---------- -->
+  <section class="view hidden" id="view-history">
+    <h2 class="view-title">Drinking history</h2>
+    <div class="history-stats" id="historyStats"></div>
+    <div id="historyList" class="wine-list"></div>
+    <div id="historyEmpty" class="empty-state hidden">
+      <div class="empty-icon">🥂</div>
+      <p>No bottles enjoyed yet. When you drink a bottle, mark it from the wine's page and it will appear here.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================= TAB BAR ======================= -->
+<nav class="tabbar">
+  <button class="tab active" data-view="cellar"><span class="tab-icon">🍷</span>Cellar</button>
+  <button class="tab tab-add" id="addBtn"><span class="tab-add-circle">＋</span>Add</button>
+  <button class="tab" data-view="racks"><span class="tab-icon">🗄</span>Racks</button>
+  <button class="tab" data-view="history"><span class="tab-icon">🥂</span>History</button>
+</nav>
+
+<!-- ======================= WINE DETAIL SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="detailBackdrop"></div>
+<div class="sheet hidden" id="detailSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="detail" aria-label="Close">✕</button>
+  <input type="file" id="detailPhotoInput" accept="image/*" hidden>
+  <div class="sheet-content" id="detailContent"></div>
+</div>
+
+<!-- ======================= ADD / EDIT SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="formBackdrop"></div>
+<div class="sheet sheet-tall hidden" id="formSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="form" aria-label="Close">✕</button>
+  <div class="sheet-content">
+    <h2 id="formTitle" class="sheet-title">Add wine</h2>
+
+    <form id="wineForm" autocomplete="off">
+      <input type="hidden" id="f-id">
+
+      <div class="photo-row">
+        <label class="photo-drop" id="photoDrop">
+          <img id="photoPreview" class="hidden" alt="Label photo">
+          <span id="photoHint">📷 Snap or upload the label</span>
+          <input type="file" id="f-photo" accept="image/*" hidden>
+        </label>
+        <button type="button" class="btn ghost identify-btn" id="identifyBtn">✨ Identify wine from photo</button>
+      </div>
+
+      <div class="form-grid">
+        <label class="field span2">
+          <span>Wine name *</span>
+          <input type="text" id="f-name" required placeholder="e.g. Barolo Ginestra Casa Maté">
+        </label>
+        <label class="field">
+          <span>Producer</span>
+          <input type="text" id="f-producer" placeholder="Domaine / winery">
+        </label>
+        <label class="field">
+          <span>Vintage</span>
+          <input type="number" id="f-vintage" min="1900" max="2035" placeholder="2019">
+        </label>
+        <button type="button" class="btn ghost identify-btn span2" id="fetchByNameBtn">✨ Fetch details from name &amp; vintage</button>
+        <label class="field">
+          <span>Style</span>
+          <select id="f-style">
+            <option value="red">Red</option>
+            <option value="white">White</option>
+            <option value="rose">Rosé</option>
+            <option value="sparkling">Sparkling</option>
+            <option value="sweet">Sweet</option>
+            <option value="fortified">Fortified</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Country</span>
+          <input type="text" id="f-country" placeholder="France">
+        </label>
+        <label class="field">
+          <span>Region</span>
+          <input type="text" id="f-region" placeholder="Bordeaux">
+        </label>
+        <label class="field">
+          <span>Appellation</span>
+          <input type="text" id="f-appellation" placeholder="Margaux AOC">
+        </label>
+        <label class="field span2">
+          <span>Grapes <small>(comma separated)</small></span>
+          <input type="text" id="f-grapes" placeholder="Cabernet Sauvignon, Merlot">
+        </label>
+        <label class="field">
+          <span>ABV %</span>
+          <input type="number" id="f-abv" step="0.1" min="0" max="25" placeholder="13.5">
+        </label>
+        <label class="field">
+          <span>&nbsp;</span>
+          <span class="field-hint" id="placedHint"></span>
+        </label>
+
+        <div class="field-group span2">
+          <span class="group-label">Bottles × format</span>
+          <div class="pair">
+            <input type="number" id="f-quantity" min="0" value="1">
+            <select id="f-size">
+              <option value="187">Piccolo (187 ml)</option>
+              <option value="375">Demi-bouteille (375 ml)</option>
+              <option value="750" selected>Standard (750 ml)</option>
+              <option value="1500">Magnum (1.5 L)</option>
+              <option value="3000">Double Magnum (3 L)</option>
+              <option value="4500">Jéroboam (4.5 L)</option>
+              <option value="6000">Impériale (6 L)</option>
+            </select>
+          </div>
+          <div class="qty-quick">
+            <button type="button" class="mini-btn" data-qty="1">×1</button>
+            <button type="button" class="mini-btn" data-qty="3">Box ×3</button>
+            <button type="button" class="mini-btn" data-qty="6">Box ×6</button>
+            <button type="button" class="mini-btn" data-qty="12">Box ×12</button>
+          </div>
+        </div>
+
+        <div class="field-group span2">
+          <span class="group-label">Drinking window</span>
+          <div class="pair">
+            <input type="number" id="f-drinkFrom" min="1990" max="2080" placeholder="From (2026)">
+            <input type="number" id="f-drinkTo" min="1990" max="2080" placeholder="To (2040)">
+          </div>
+        </div>
+
+        <div class="field-group span2">
+          <span class="group-label">Ratings <small>(from the lookup links)</small></span>
+          <div class="pair">
+            <input type="number" id="f-ratingVivino" step="0.1" min="0" max="5" placeholder="Vivino users /5">
+            <input type="number" id="f-ratingCritic" step="1" min="0" max="100" placeholder="Wine-Searcher /100">
+          </div>
+        </div>
+
+        <div class="field-group span2">
+          <span class="group-label">Market price (per bottle)</span>
+          <div class="pair">
+            <input type="number" id="f-marketPrice" step="0.01" min="0" placeholder="45.00">
+            <select id="f-marketCurrency">
+              <option value="CHF" selected>CHF</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+        <label class="field span2">
+          <span>Purchase price (CHF per bottle, excl. VAT)</span>
+          <input type="number" id="f-purchasePrice" step="0.01" min="0" placeholder="32.00">
+          <span class="field-hint" id="vatHint"></span>
+        </label>
+        <label class="field span2">
+          <span>Purchase date</span>
+          <input type="date" id="f-purchaseDate">
+        </label>
+
+        <label class="field span2">
+          <span>Edulis note — headline</span>
+          <input type="text" id="f-edulisTitle" placeholder="Short summary shown on the wine page">
+        </label>
+        <label class="field span2">
+          <span>Edulis note — full text</span>
+          <textarea id="f-edulisBody" rows="3" placeholder="Full note from Edulis…"></textarea>
+        </label>
+        <label class="field span2">
+          <span>Edulis email date</span>
+          <input type="date" id="f-edulisDate">
+        </label>
+        <label class="field span2">
+          <span>My notes</span>
+          <textarea id="f-notes" rows="2" placeholder="Anything else…"></textarea>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelForm">Cancel</button>
+        <button type="submit" class="btn primary" id="saveForm">Save wine</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= DRINK BOTTLE SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="drinkBackdrop"></div>
+<div class="sheet hidden" id="drinkSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="drink" aria-label="Close">✕</button>
+  <div class="sheet-content">
+    <h2 class="sheet-title">🥂 Drink a bottle</h2>
+    <p id="drinkWineName" class="drink-wine-name"></p>
+    <form id="drinkForm">
+      <input type="hidden" id="d-id">
+      <label class="field">
+        <span>Date</span>
+        <input type="date" id="d-date">
+      </label>
+      <label class="field">
+        <span>Occasion / tasting note</span>
+        <textarea id="d-note" rows="3" placeholder="Dinner with… tasted like…"></textarea>
+      </label>
+      <label class="field">
+        <span>My rating (1–5)</span>
+        <input type="number" id="d-rating" step="1" min="1" max="5" placeholder="5">
+      </label>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelDrink">Cancel</button>
+        <button type="submit" class="btn primary">Mark as drunk</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= RACK FORM SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="rackFormBackdrop"></div>
+<div class="sheet hidden" id="rackFormSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="rackForm" aria-label="Close">✕</button>
+  <div class="sheet-content">
+    <h2 class="sheet-title" id="rackFormTitle">Add rack</h2>
+    <form id="rackForm" autocomplete="off">
+      <input type="hidden" id="r-id">
+      <div class="form-grid">
+        <label class="field span2">
+          <span>Name *</span>
+          <input type="text" id="r-name" required placeholder="e.g. Cave wall A">
+        </label>
+        <label class="field">
+          <span>Type</span>
+          <select id="r-kind">
+            <option value="rack">🗄 Rack</option>
+            <option value="fridge">🧊 Wine fridge</option>
+            <option value="case">📦 Case / box</option>
+            <option value="shelf">📚 Shelf</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>&nbsp;</span>
+          <span class="field-hint" id="rackSizeHint"></span>
+        </label>
+        <label class="field">
+          <span>Rows</span>
+          <input type="number" id="r-rows" min="1" max="20" value="6">
+        </label>
+        <label class="field">
+          <span>Columns</span>
+          <input type="number" id="r-cols" min="1" max="20" value="8">
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelRackForm">Cancel</button>
+        <button type="submit" class="btn primary">Save rack</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= SLOT / PICK SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="slotBackdrop"></div>
+<div class="sheet hidden" id="slotSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="slot" aria-label="Close">✕</button>
+  <div class="sheet-content" id="slotContent"></div>
+</div>
+
+<!-- ======================= SETTINGS SHEET ======================= -->
+<div class="sheet-backdrop hidden" id="settingsBackdrop"></div>
+<div class="sheet hidden" id="settingsSheet" role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <button type="button" class="sheet-close" data-close="settings" aria-label="Close">✕</button>
+  <div class="sheet-content">
+    <h2 class="sheet-title">Settings</h2>
+
+    <div class="settings-section">
+      <h3 class="settings-h">🖥 Server</h3>
+      <p id="serverStatus" class="sync-status">Checking…</p>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="settings-h">🎨 Theme</h3>
+      <div class="filter-row" id="themeRow">
+        <button class="chip" data-themepick="cellar">🍷 Cellar (dark)</button>
+        <button class="chip" data-themepick="linen">🌾 Linen</button>
+        <button class="chip" data-themepick="blanc">⚪ Blanc</button>
+        <button class="chip" data-themepick="rose">🌸 Rosé</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="settings-h">✨ Label identification</h3>
+      <label class="field">
+        <span>Claude API key</span>
+        <input type="password" id="claudeKeyInput" placeholder="sk-ant-…" autocomplete="off">
+      </label>
+      <p class="settings-note">From console.anthropic.com. Stored only on this device — enables photo identification and fetch-by-name.</p>
+    </div>
+
+    <h3 class="settings-h">💾 Backup &amp; migration</h3>
+    <div class="settings-list">
+      <button class="settings-item" id="exportBtn">
+        <span>⬇️ Download server backup (JSON)</span>
+        <small>Full snapshot — restorable via the migrate button below</small>
+      </button>
+      <button class="settings-item" id="importBtn">
+        <span>⬆️ Migrate / restore to server</span>
+        <small>Old app export or a server backup — replaces ALL server data</small>
+      </button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <p class="settings-note">Wines, racks and history live on wine.ad85.com (MariaDB, backed up daily by Loopia). Label photos stay on each device.</p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>

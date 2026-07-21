@@ -1,0 +1,101 @@
+/* ---------- Loopia build additions ---------- */
+
+.net-banner {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  background: color-mix(in srgb, var(--bad) 18%, var(--bg));
+  color: var(--bad);
+  border-bottom: 1px solid color-mix(in srgb, var(--bad) 40%, transparent);
+  padding: calc(var(--sat) + 8px) 16px 8px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* racks */
+#racksList { display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; }
+
+.rack-card {
+  background: linear-gradient(150deg, var(--card-2), var(--card));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.rack-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rack-name { font-family: "Palatino", "Iowan Old Style", Georgia, serif; font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rack-count { font-size: 12px; color: var(--text-dim); flex-shrink: 0; }
+.rack-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.rack-actions .icon-btn { width: 30px; height: 30px; font-size: 14px; }
+
+.rack-grid-wrap { overflow-x: auto; padding-bottom: 4px; }
+.rack-grid { display: grid; gap: 5px; width: max-content; min-width: 100%; }
+
+.slot {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1.5px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: var(--bg-soft);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  padding: 0;
+}
+.slot.occupied { border-style: solid; border-color: transparent; }
+.slot.occupied.st-red { background: #8e2a3f; }
+.slot.occupied.st-white { background: #b99b3e; }
+.slot.occupied.st-rose { background: #d06e83; }
+.slot.occupied.st-sparkling { background: #7d8f5a; }
+.slot.occupied.st-sweet { background: #a8702a; }
+.slot.occupied.st-fortified { background: #6b4a2b; }
+.slot.placing-target { border-color: var(--ok); border-style: solid; box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 35%, transparent); }
+
+.placing-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold-soft);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  color: var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  margin-bottom: 12px;
+}
+.placing-banner span { flex: 1; }
+
+.add-rack-btn { width: 100%; margin: 4px 0 24px; }
+
+/* wine picker rows in the slot sheet */
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.pick-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.pick-main { flex: 1; min-width: 0; }
+.pick-name { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-sub { font-size: 12px; color: var(--text-dim); }
+.pick-loose { font-size: 12px; color: var(--gold); flex-shrink: 0; }
+
+.slot-title { font-family: Georgia, serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+.slot-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 14px; }
